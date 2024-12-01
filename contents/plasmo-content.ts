@@ -1,6 +1,7 @@
 import type { PlasmoCSConfig } from "plasmo"
-const newImageUrl = "https://cdn.loveandlemons.com/wp-content/uploads/2020/05/granola-bars.jpg"
+let newImageUrl = "https://cdn.loveandlemons.com/wp-content/uploads/2020/05/granola-bars.jpg"
 const apiEndpoint = "http://localhost:3002/?prompt=";
+const granolaEndpoint = "https://baubautoimage.hackathon-cf.workers.dev/"
 
 export const config: PlasmoCSConfig = {
     matches: ["*://*/*"]
@@ -112,12 +113,13 @@ const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
         if (mutation.type === "childList") {
             // Replace images in newly added nodes
-            replaceImage();
+            // replaceImage();
         }
     });
 });
 
 async function onPageLoad() {
+    // await generateGranolaImage("A granola bar with a vibrant rainbow-colored wrapper, sitting in the middle of a bustling city street. The bar is wearing tiny sunglasses and a scarf.")
     await replaceImage();
     await replaceText();
 }
@@ -125,4 +127,28 @@ async function onPageLoad() {
 window.addEventListener("load", onPageLoad);
 observer.observe(document.body, { childList: true, subtree: true });
 
+async function generateGranolaImage(prompt) {
+    try {
+        const granolaEndpoint = `https://baubautoimage.hackathon-cf.workers.dev/?prompt=${encodeURIComponent(prompt)}`;
 
+        // Fetch the image binary data from the API
+        const response = await fetch(granolaEndpoint, {
+            method: 'GET', // Assuming a GET request for simplicity
+            headers: {
+                'Accept': 'image/png', // Tell the server we're expecting an image
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Image fetch failed');
+        }
+
+        // Get the image data as a Blob (binary data)
+        const imageBlob = await response.blob();
+        newImageUrl = URL.createObjectURL(imageBlob); // Create an object URL for the Blob
+        console.log('New image URL:', newImageUrl);
+        return newImageUrl;
+    } catch (error) {
+        console.error('Error fetching the image:', error);
+    }
+}

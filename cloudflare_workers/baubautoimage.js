@@ -1,7 +1,11 @@
 export default {
     async fetch(request, env) {
+        // Extract the prompt from the URL's query parameters
+        const url = new URL(request.url);
+        const prompt = url.searchParams.get('prompt') || "granola bar lying down on a map of North America"; // Default prompt if not provided
+
         const inputs = {
-            prompt: "cyberpunk cat",
+            prompt: prompt,
         };
 
         const response = await env.AI.run(
